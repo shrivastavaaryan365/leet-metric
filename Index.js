@@ -28,13 +28,28 @@ document.addEventListener("DOMContentLoaded", function(){
 
 
     async function fetchUserDetails(username) {
-        
-        const url = `https://leetcode-start-api.herokuapp.com/${username}`
+
         try{
             searchButton.textContent = "Searching..."
             searchButton.disabled=true;
 
-            let response = await fetch (url);
+        const proxyUrl = 'https://cors-anywhere.herokuapp.com/'
+        const targetUrl = 'https://leetcode.com/graphql'
+        const myHeader = new Headers();
+        myHeader.append("content-type", "application/json");
+
+        const graphql = JSON.stringify({
+                query : "\n query userSessionProgress($username: String!) {\n allquestionCount {\n difficulty\n count\n}\n matchedUser (username: $username) {\n submitStats {\n acSubmissionNum {\n totalSubmisssionNum{\n diffivulty\n count\n submission\n }\n }\n}\n ", 
+                variables: {"username": `${username}` }
+            })
+
+            const requestOptions ={
+                method : "POST",
+                headers : myHeader,
+                body : graphql,
+                redirect : "Follow"
+            };
+        let response = await fetch (proxyUrl+targetUrl, requestOptions);
             if(!response.ok){ 
                 throw new Error("Unable to fetch the User details")
             }
